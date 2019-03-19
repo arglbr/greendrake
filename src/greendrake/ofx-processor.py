@@ -1,11 +1,41 @@
 import codecs
+import sys
 import csv
 from datetime import datetime
 from ofxparse import OfxParser # github.com/jseutter/ofxparse
 import shutil
+import difflib
+
+def similarityRatio(p_seq1, p_seq2, p_ratio):
+  return difflib.SequenceMatcher(a = p_seq1.lower(), b = p_seq2.lower()).ratio() >= p_ratio
+
+def setCategory (p_memo):
+  categs = '/Users/arglbr/src/greendrake/data/db/gd-categories-ca342569/class_items.csv'
+  ret    = 'INDEFINIDO'
+  accsim = 0.8
+
+  try:
+    with open(categs) as cf:
+      reader = csv.DictReader(cf)
+      c_diffratio = 0
+      r_diffratio = 0
+
+      for row in reader:
+        categid     = row['CATEGORY_ID']
+        pattern     = row['PATTERN'].lower().replace('visa electron ', '')
+        memo        = p_memo.lower().replace('visa electron ', '')
+        c_diffratio = difflib.SequenceMatcher(a = memo, b = pattern).ratio()
+
+        if c_diffratio >= accsim and c_diffratio > r_diffratio:
+          r_diffratio = c_diffratio
+          ret = categid
+  except Exception as exc3:
+    ret = exc3
+
+  return ret
 
 if __name__ == '__main__':
-  fname   = 'Bradesco_05032019_150334.ofx'
+  fname   = sys.argv[1] # 'bradesco_201902.ofx'
   rawfile = '/Users/arglbr/src/greendrake/data/db/gd-raw-be3bc2c/' + fname
   archive = '/Users/arglbr/src/greendrake/data/db/gd-archive-ec5e29c8/'
   optpath = '/Users/arglbr/src/greendrake/data/db/gd-optimized-4bf3bb45/'
@@ -28,7 +58,7 @@ if __name__ == '__main__':
 
     with open(datafile, mode='w') as af:
       afw = csv.writer(af, delimiter=';', quotechar='"', quoting=csv.QUOTE_MINIMAL)
-      afw.writerow(['Bank', 'AccountID', 'BalStartDate', 'BalEndDate', 'TrDate', 'TrChecknum', 'TrType', 'TrMemo', 'TrAmount', 'TrID', 'TrSic', 'TrMcc', 'TrPayee'])
+      afw.writerow(['Bank', 'AccountID', 'BalStartDate', 'BalEndDate', 'TrDate', 'TrChecknum', 'TrType', 'TrMemo', 'TrAmount', 'TrID', 'TrSic', 'TrMcc', 'TrPayee', 'Category'])
 
       # Transaction
       for transaction in statement.transactions:
@@ -44,7 +74,8 @@ if __name__ == '__main__':
                     transaction.id,
                     str(transaction.sic),
                     str(transaction.mcc),
-                    transaction.payee])
+                    transaction.payee,
+                    setCategory(transaction.memo)])
   except ValueError as ve:
     print("[WRN] Exception while trying to convert data: " + ve)
   except Exception as exc1:
