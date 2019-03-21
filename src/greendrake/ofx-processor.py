@@ -58,6 +58,7 @@ if __name__ == '__main__':
 
     with open(datafile, mode='w') as af:
       afw = csv.writer(af, delimiter=';', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+      # TODO: Generate an unique identifier for the row (UUID?)
       afw.writerow(['Bank', 'AccountID', 'BalStartDate', 'BalEndDate', 'TrDate', 'TrChecknum', 'TrType', 'TrMemo', 'TrAmount', 'TrID', 'TrSic', 'TrMcc', 'TrPayee', 'Category'])
 
       # Transaction
@@ -87,3 +88,4 @@ if __name__ == '__main__':
     except Exception as exc2:
       print('[ERR] Exception while trying to move file: ' + exc2)
       exit(3)
+
