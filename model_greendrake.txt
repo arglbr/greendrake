@@ -1,0 +1,9 @@
+* O Adriano obtém o arquivo de extrato no banco no formato MSMoney mais recente;
+* O Adriano realiza o upload do arquivo num bucket S3;
+* O upload dispara um evento para chamar uma lambda;
+   - Não chama lambda. Se der erro na execução vc perde o processamento;
+   - Melhor colocar um item numa fila, a inserção deste item chama uma lambda que o processa. Se tudo estiver bem no final do processamento vc remove o item da fila.
+* A função lambda disparada processa o arquivo e o grava em outro bucket S3, num formato enriquecido;
+   - O processamento categoriza cada linha do extrato, remove o que não precisa, entre outras coisas;
+* O arquivo original processado é enviado para um terceiro bucket de archiving;
+* O segundo bucket passa a ser fonte para o Athena ou QuickSight - Precisa testar e ver qual traz a melhor visualização.
