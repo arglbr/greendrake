@@ -5,6 +5,7 @@ from datetime import datetime
 from ofxparse import OfxParser # github.com/jseutter/ofxparse
 import shutil
 import difflib
+import uuid
 
 def similarityRatio(p_seq1, p_seq2, p_ratio):
   return difflib.SequenceMatcher(a = p_seq1.lower(), b = p_seq2.lower()).ratio() >= p_ratio
@@ -58,12 +59,12 @@ if __name__ == '__main__':
 
     with open(datafile, mode='w') as af:
       afw = csv.writer(af, delimiter=';', quotechar='"', quoting=csv.QUOTE_MINIMAL)
-      # TODO: Generate an unique identifier for the row (UUID?)
-      afw.writerow(['Bank', 'AccountID', 'BalStartDate', 'BalEndDate', 'TrDate', 'TrChecknum', 'TrType', 'TrMemo', 'TrAmount', 'TrID', 'TrSic', 'TrMcc', 'TrPayee', 'Category'])
+      afw.writerow(['RowID', 'Bank', 'AccountID', 'BalStartDate', 'BalEndDate', 'TrDate', 'TrChecknum', 'TrType', 'TrMemo', 'TrAmount', 'TrID', 'TrSic', 'TrMcc', 'TrPayee', 'Category'])
 
       # Transaction
       for transaction in statement.transactions:
-        afw.writerow(['BDN',
+        afw.writerow([uuid.uuid4().hex,
+                    'BDO',
                     account.account_id + account.routing_number,
                     initdate,
                     enddate,

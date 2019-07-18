@@ -1,9 +1,14 @@
 * O Adriano obtém o arquivo de extrato no banco no formato MSMoney mais recente;
 * O Adriano realiza o upload do arquivo num bucket S3;
-* O upload dispara um evento para chamar uma lambda;
-   - Não chama lambda. Se der erro na execução vc perde o processamento;
-   - Melhor colocar um item numa fila, a inserção deste item chama uma lambda que o processa. Se tudo estiver bem no final do processamento vc remove o item da fila.
-* A função lambda disparada processa o arquivo e o grava em outro bucket S3, num formato enriquecido;
-   - O processamento categoriza cada linha do extrato, remove o que não precisa, entre outras coisas;
-* O arquivo original processado é enviado para um terceiro bucket de archiving;
-* O segundo bucket passa a ser fonte para o Athena ou QuickSight - Precisa testar e ver qual traz a melhor visualização.
+* O upload dispara um evento para inserir um item de processamento numa fila;
+* Uma função lambda processa o item da fila:
+   - O processamento:
+      - Categoriza cada linha do extrato;
+      - Remove as linhas que não precisa;
+      - Faz outras coisas;
+      - Grava os dados processados em outro bucket S3, num formato otimizado;
+      - Move o arquivo processado para um bucket de archive;
+      - Remove o item da fila.
+* Os arquivos otimizados passam a ser fonte para o Athena para análises ad-hoc;
+* O QuickSight geram as visualizações para os dados.
+* Como retroalimentar as categorias?
