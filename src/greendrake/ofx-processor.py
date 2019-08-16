@@ -31,21 +31,23 @@ def setCategory (p_memo):
           r_diffratio = c_diffratio
           ret = categid
   except Exception as exc3:
-    ret = exc3
+    msg = 'Error on setCategory() method.'
+    print("[WRN]" + msg + ". Exception: " + exc3.fnferror)
+    ret = msg
 
   return ret
 
 if __name__ == '__main__':
   fname   = sys.argv[1] # 'bradesco_201902.ofx'
-  rawfile = '/Users/arglbr/src/greendrake/data/db/gd-raw-be3bc2c/' + fname
-  archive = '/Users/arglbr/src/greendrake/data/db/gd-archive-ec5e29c8/'
-  optpath = '/Users/arglbr/src/greendrake/data/db/gd-optimized-4bf3bb45/'
+  rawfile = '/Users/arglbr/src/arglbr/greendrake/data/db/gd-raw-be3bc2c/' + fname
+  archive = '/Users/arglbr/src/arglbr/greendrake/data/db/gd-archive-ec5e29c8/'
+  optpath = '/Users/arglbr/src/arglbr/greendrake/data/db/gd-optimized-4bf3bb45/'
 
   try:
     with codecs.open(rawfile) as rf:
       ofx = OfxParser.parse(rf)
   except FileNotFoundError as fnf:
-    print('[ERR] Exception while opening file: ' + fnf.strerror)
+    print('[ERR] Exception while opening raw file: ' + fnf.strerror)
     exit(1)
 
   # Account & Statement
