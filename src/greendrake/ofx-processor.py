@@ -1,3 +1,7 @@
+from __future__ import annotations
+from abc import ABC, abstractmethod
+from typing import List
+
 import codecs
 import sys
 import csv
@@ -7,37 +11,66 @@ import shutil
 import difflib
 import uuid
 
-def similarityRatio(p_seq1, p_seq2, p_ratio):
-  return difflib.SequenceMatcher(a = p_seq1.lower(), b = p_seq2.lower()).ratio() >= p_ratio
+class OFXProcessor():
+  def __init__(self, filestrategy: FileStrategy) -> None:
+    self._filestrategy = filestrategy
 
-def setCategory (p_memo):
-  categs = '/Users/arglbr/src/greendrake/data/db/gd-categories-ca342569/class_items.csv'
-  ret    = 'INDEFINIDO'
-  accsim = 0.8
+  @property
+  def filestrategy(self) -> FileStrategy:
+    return self._filestrategy
 
-  try:
-    with open(categs) as cf:
-      reader = csv.DictReader(cf)
-      c_diffratio = 0
-      r_diffratio = 0
+  @filestrategy.setter
+  def filestrategy(self, filestrategy: FileStrategy) -> None:
+    self._filestrategy = filestrategy
 
-      for row in reader:
-        categid     = row['CATEGORY_ID']
-        pattern     = row['PATTERN'].lower().replace('visa electron ', '')
-        memo        = p_memo.lower().replace('visa electron ', '')
-        c_diffratio = difflib.SequenceMatcher(a = memo, b = pattern).ratio()
+  def setCategory (self, p_memo) -> None:
+    categs = self._filestrategy.readCategoryFile()
+    ret    = 'INDEFINIDO'
+    accsim = 0.8
 
-        if c_diffratio >= accsim and c_diffratio > r_diffratio:
-          r_diffratio = c_diffratio
-          ret = categid
-  except Exception as exc3:
-    msg = 'Error on setCategory() method.'
-    print("[WRN]" + msg + ". Exception: " + exc3.fnferror)
-    ret = msg
+    try:
+      with open(categs) as cf:
+        reader = csv.DictReader(cf)
+        c_diffratio = 0
+        r_diffratio = 0
 
-  return ret
+        for row in reader:
+          categid     = row['CATEGORY_ID']
+          pattern     = row['PATTERN'].lower().replace('visa electron ', '')
+          memo        = p_memo.lower().replace('visa electron ', '')
+          c_diffratio = difflib.SequenceMatcher(a = memo, b = pattern).ratio()
 
-if __name__ == '__main__':
+          if c_diffratio >= accsim and c_diffratio > r_diffratio:
+            r_diffratio = c_diffratio
+            ret = categid
+    except Exception as exc3:
+      msg = 'Error on setCategory() method.'
+      print("[WRN]" + msg + ". Exception: " + exc3.fnferror)
+      ret = msg
+
+    return ret
+
+  def similarityRatio(p_seq1, p_seq2, p_ratio):
+    return difflib.SequenceMatcher(a = p_seq1.lower(), b = p_seq2.lower()).ratio() >= p_ratio
+
+class FileStrategy(ABC):
+  @abstractmethod
+  def readCategoryFile(self):
+    pass
+
+class FileStrategyLocal(FileStrategy):
+  def readCategoryFile(self):
+    categories_file = '/Users/arglbr/src/arglbr/greendrake/data/db/gd-categories-ca342569/class_items.csv'
+    return categories_file
+
+class FileStrategyAWSS3(FileStrategy):
+  def readCategoryFile(self):
+    # Bring the file from S3
+    # Copy the file to the tmp directory and return the path
+    return 'path_tmp'
+
+if __name__ == "__main__":
+  ofxp = OFXProcessor(FileStrategyLocal())
   fname   = sys.argv[1] # 'bradesco_201902.ofx'
   rawfile = '/Users/arglbr/src/arglbr/greendrake/data/db/gd-raw-be3bc2c/' + fname
   archive = '/Users/arglbr/src/arglbr/greendrake/data/db/gd-archive-ec5e29c8/'
@@ -79,7 +112,7 @@ if __name__ == '__main__':
                     str(transaction.sic),
                     str(transaction.mcc),
                     transaction.payee,
-                    setCategory(transaction.memo)])
+                    ofxp.setCategory(transaction.memo)])
   except ValueError as ve:
     print("[WRN] Exception while trying to convert data: " + ve)
   except Exception as exc1:
@@ -91,4 +124,3 @@ if __name__ == '__main__':
     except Exception as exc2:
       print('[ERR] Exception while trying to move file: ' + exc2)
       exit(3)
-
