@@ -23,7 +23,7 @@ class OFXProcessor():
   def filestrategy(self, filestrategy: FileStrategy) -> None:
     self._filestrategy = filestrategy
 
-  def setCategory (self, p_memo) -> None:
+  def setCategory (self, p_memo):
     categs = self._filestrategy.readCategoryFile()
     ret    = 'INDEFINIDO'
     accsim = 0.8
@@ -70,7 +70,7 @@ class FileStrategyAWSS3(FileStrategy):
     return 'path_tmp'
 
 if __name__ == "__main__":
-  ofxp = OFXProcessor(FileStrategyLocal())
+  ofxp = OFXProcessor(FileStrategyLocal)
   fname   = sys.argv[1] # 'bradesco_201902.ofx'
   rawfile = '/Users/arglbr/src/arglbr/greendrake/data/db/gd-raw-be3bc2c/' + fname
   archive = '/Users/arglbr/src/arglbr/greendrake/data/db/gd-archive-ec5e29c8/'
@@ -116,11 +116,11 @@ if __name__ == "__main__":
   except ValueError as ve:
     print("[WRN] Exception while trying to convert data: " + ve)
   except Exception as exc1:
-    print('[ERR] Exception while trying to write on file [' + datafile + ']: ' + exc1)
+    print("[ERR] Exception while trying to write on file %s [" + datafile + "]: " %exc1)
     exit(2)
   finally:
     try:
       shutil.move(rawfile, archive)
     except Exception as exc2:
-      print('[ERR] Exception while trying to move file: ' + exc2)
+      print('[ERR] Exception while trying to move file: ' + exc2.strerror)
       exit(3)
