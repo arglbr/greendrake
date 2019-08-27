@@ -4,3 +4,5 @@ ofxparse==0.20
 six==1.12.0
 soupsieve==1.8
 git+git://github.com/jseutter/ofxparse.git
+python-dotenv
+
