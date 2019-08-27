@@ -3,18 +3,26 @@ import csv
 import difflib
 import logging
 from FileStrategy import FileStrategy
+from FileStrategyAWSS3 import FileStrategyAWSS3
+from FileStrategyLocal import FileStrategyLocal
 
 class OFXProcessor():
-  def __init__(self, filestrategy: FileStrategy) -> None:
-    self._filestrategy = filestrategy
+  def __init__(self, p_filestrategy) -> None:
+    if p_filestrategy == 'aws':
+      self._filestrategy = FileStrategyAWSS3
+    else:
+      self._filestrategy = FileStrategyLocal
 
   @property
   def filestrategy(self) -> FileStrategy:
     return self._filestrategy
 
   @filestrategy.setter
-  def filestrategy(self, filestrategy: FileStrategy) -> None:
-    self._filestrategy = filestrategy
+  def filestrategy(self, p_filestrategy) -> None:
+    if p_filestrategy == 'aws':
+      self._filestrategy = FileStrategyAWSS3()
+    else:
+      self._filestrategy = FileStrategyLocal()
 
   def setCategory (self, p_memo):
     categs = self._filestrategy.readCategoryFile(self)

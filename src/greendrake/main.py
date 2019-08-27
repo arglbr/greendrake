@@ -6,7 +6,7 @@ from datetime import datetime
 from ofxparse import OfxParser # github.com/jseutter/ofxparse
 import uuid
 import logging
-
+import os
 from dotenv import load_dotenv
 from pathlib import Path
 env_path = Path('config/') / '.env'
@@ -15,10 +15,9 @@ env_path = Path('config/') / '.env'
 load_dotenv(dotenv_path=env_path)
 
 from OFXProcessor import OFXProcessor
-from FileStrategyLocal import FileStrategyLocal
 
 if __name__ == "__main__":
-  ofxp    = OFXProcessor(FileStrategyLocal)
+  ofxp    = OFXProcessor(os.getenv('DATA_STRATEGY'))
   fs      = ofxp.filestrategy()
   rawfile = fs.readRawFile(sys.argv[1]) # 'bradesco_201902.ofx'
 
