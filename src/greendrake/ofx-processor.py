@@ -62,6 +62,10 @@ class FileStrategy(ABC):
   def readRawFile(self, p_fname):
     pass
 
+  @abstractmethod
+  def moveArchiveFile(self, p_fname):
+    pass
+
 class FileStrategyLocal(FileStrategy):
   def readCategoryFile(self):
     categories_file = '/Users/arglbr/src/arglbr/greendrake/data/db/gd-categories-ca342569/class_items.csv'
@@ -71,21 +75,31 @@ class FileStrategyLocal(FileStrategy):
     raw_file = '/Users/arglbr/src/arglbr/greendrake/data/db/gd-raw-be3bc2c/' + p_fname
     return raw_file
 
+  def moveArchiveFile(self, p_fname):
+    archive = '/Users/arglbr/src/arglbr/greendrake/data/db/gd-archive-ec5e29c8/'
+
+    try:
+      shutil.move(p_fname, archive)
+    except Exception as exc2:
+      print('[ERR] Exception while trying to move file: ' + exc2.strerror)
+      print('[ERR] File: ' + p_fname)
+      print('[ERR] To: ' + archive)
+      exit(3)
+
 class FileStrategyAWSS3(FileStrategy):
   def readCategoryFile(self):
-    # Bring the file from S3
-    # Copy the file to the tmp directory and return the path
-    return 'path_tmp'
+    return 'path_tmp' # Bring the file from S3, copy to tmp dir and return the path
 
-  @abstractmethod
   def readRawFile(self, p_fname):
+    return 'path_raw' # Bring the file from S3, copy to tmp dir and return the path
+
+  def moveArchiveFile(self, p_fname):
     pass
 
 if __name__ == "__main__":
   ofxp    = OFXProcessor(FileStrategyLocal)
   fs      = ofxp.filestrategy()
   rawfile = fs.readRawFile(sys.argv[1]) # 'bradesco_201902.ofx'
-  archive = '/Users/arglbr/src/arglbr/greendrake/data/db/gd-archive-ec5e29c8/'
   optpath = '/Users/arglbr/src/arglbr/greendrake/data/db/gd-optimized-4bf3bb45/'
 
   try:
@@ -132,8 +146,4 @@ if __name__ == "__main__":
     print(exc1)
     exit(2)
   finally:
-    try:
-      shutil.move(rawfile, archive)
-    except Exception as exc2:
-      print('[ERR] Exception while trying to move file: ' + exc2.strerror)
-      exit(3)
+    fs.moveArchiveFile(rawfile)
