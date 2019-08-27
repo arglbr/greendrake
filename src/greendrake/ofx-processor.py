@@ -24,7 +24,7 @@ class OFXProcessor():
     self._filestrategy = filestrategy
 
   def setCategory (self, p_memo):
-    categs = self._filestrategy.readCategoryFile()
+    categs = self._filestrategy.readCategoryFile(self)
     ret    = 'INDEFINIDO'
     accsim = 0.8
 
@@ -58,10 +58,18 @@ class FileStrategy(ABC):
   def readCategoryFile(self):
     pass
 
+  @abstractmethod
+  def readRawFile(self, p_fname):
+    pass
+
 class FileStrategyLocal(FileStrategy):
   def readCategoryFile(self):
     categories_file = '/Users/arglbr/src/arglbr/greendrake/data/db/gd-categories-ca342569/class_items.csv'
     return categories_file
+
+  def readRawFile(self, p_fname):
+    raw_file = '/Users/arglbr/src/arglbr/greendrake/data/db/gd-raw-be3bc2c/' + p_fname
+    return raw_file
 
 class FileStrategyAWSS3(FileStrategy):
   def readCategoryFile(self):
@@ -69,10 +77,14 @@ class FileStrategyAWSS3(FileStrategy):
     # Copy the file to the tmp directory and return the path
     return 'path_tmp'
 
+  @abstractmethod
+  def readRawFile(self, p_fname):
+    pass
+
 if __name__ == "__main__":
-  ofxp = OFXProcessor(FileStrategyLocal)
-  fname   = sys.argv[1] # 'bradesco_201902.ofx'
-  rawfile = '/Users/arglbr/src/arglbr/greendrake/data/db/gd-raw-be3bc2c/' + fname
+  ofxp    = OFXProcessor(FileStrategyLocal)
+  fs      = ofxp.filestrategy()
+  rawfile = fs.readRawFile(sys.argv[1]) # 'bradesco_201902.ofx'
   archive = '/Users/arglbr/src/arglbr/greendrake/data/db/gd-archive-ec5e29c8/'
   optpath = '/Users/arglbr/src/arglbr/greendrake/data/db/gd-optimized-4bf3bb45/'
 
@@ -116,7 +128,8 @@ if __name__ == "__main__":
   except ValueError as ve:
     print("[WRN] Exception while trying to convert data: " + ve)
   except Exception as exc1:
-    print("[ERR] Exception while trying to write on file %s [" + datafile + "]: " %exc1)
+    print("[ERR] Exception while trying to process file [" + datafile + "]")
+    print(exc1)
     exit(2)
   finally:
     try:
