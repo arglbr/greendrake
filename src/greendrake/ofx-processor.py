@@ -66,6 +66,10 @@ class FileStrategy(ABC):
   def moveArchiveFile(self, p_fname):
     pass
 
+  @abstractmethod
+  def getOptFileForWrite(self, p_prefix, p_initdate, p_enddate):
+    pass
+
 class FileStrategyLocal(FileStrategy):
   def readCategoryFile(self):
     categories_file = '/Users/arglbr/src/arglbr/greendrake/data/db/gd-categories-ca342569/class_items.csv'
@@ -86,6 +90,11 @@ class FileStrategyLocal(FileStrategy):
       print('[ERR] To: ' + archive)
       exit(3)
 
+  def getOptFileForWrite(self, p_prefix, p_initdate, p_enddate):
+    optpath  = '/Users/arglbr/src/arglbr/greendrake/data/db/gd-optimized-4bf3bb45/'
+    datafile = optpath + p_prefix + '_' + p_initdate + '_' + p_enddate + '.csv'
+    return open(datafile, mode='w')
+
 class FileStrategyAWSS3(FileStrategy):
   def readCategoryFile(self):
     return 'path_tmp' # Bring the file from S3, copy to tmp dir and return the path
@@ -96,11 +105,13 @@ class FileStrategyAWSS3(FileStrategy):
   def moveArchiveFile(self, p_fname):
     pass
 
+  def getOptFileForWrite(self, p_prefix, p_initdate, p_enddate):
+    pass # Use smart_open module
+
 if __name__ == "__main__":
   ofxp    = OFXProcessor(FileStrategyLocal)
   fs      = ofxp.filestrategy()
   rawfile = fs.readRawFile(sys.argv[1]) # 'bradesco_201902.ofx'
-  optpath = '/Users/arglbr/src/arglbr/greendrake/data/db/gd-optimized-4bf3bb45/'
 
   try:
     with codecs.open(rawfile) as rf:
@@ -116,9 +127,9 @@ if __name__ == "__main__":
   enddate   = datetime.strftime(statement.end_date, '%Y%m%d')
 
   try:
-    datafile = optpath + 'bdn_' + initdate + '_' + enddate + '.csv'
+    opt = fs.getOptFileForWrite('bdn', initdate, enddate)
 
-    with open(datafile, mode='w') as af:
+    with opt as af:
       afw = csv.writer(af, delimiter=';', quotechar='"', quoting=csv.QUOTE_MINIMAL)
       afw.writerow(['RowID', 'Bank', 'AccountID', 'BalStartDate', 'BalEndDate', 'TrDate', 'TrChecknum', 'TrType', 'TrMemo', 'TrAmount', 'TrID', 'TrSic', 'TrMcc', 'TrPayee', 'Category'])
 
