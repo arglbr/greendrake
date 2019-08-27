@@ -10,6 +10,7 @@ from ofxparse import OfxParser # github.com/jseutter/ofxparse
 import shutil
 import difflib
 import uuid
+import logging
 
 class OFXProcessor():
   def __init__(self, filestrategy: FileStrategy) -> None:
@@ -45,7 +46,7 @@ class OFXProcessor():
             ret = categid
     except Exception as exc3:
       msg = 'Error on setCategory() method.'
-      print("[WRN]" + msg + ". Exception: " + exc3.fnferror)
+      logging.warning(msg + '. Exception: ' + exc3.fnferror)
       ret = msg
 
     return ret
@@ -85,9 +86,9 @@ class FileStrategyLocal(FileStrategy):
     try:
       shutil.move(p_fname, archive)
     except Exception as exc2:
-      print('[ERR] Exception while trying to move file: ' + exc2.strerror)
-      print('[ERR] File: ' + p_fname)
-      print('[ERR] To: ' + archive)
+      logging.error('Exception while trying to move file: ' + exc2.strerror)
+      logging.error('File: ' + p_fname)
+      logging.error('To: ' + archive)
       exit(3)
 
   def getOptFileForWrite(self, p_prefix, p_initdate, p_enddate):
@@ -117,7 +118,7 @@ if __name__ == "__main__":
     with codecs.open(rawfile) as rf:
       ofx = OfxParser.parse(rf)
   except FileNotFoundError as fnf:
-    print('[ERR] Exception while opening raw file: ' + fnf.strerror)
+    logging.error('Exception while opening raw file: ' + fnf.strerror)
     exit(1)
 
   # Account & Statement
@@ -151,10 +152,10 @@ if __name__ == "__main__":
                     transaction.payee,
                     ofxp.setCategory(transaction.memo)])
   except ValueError as ve:
-    print("[WRN] Exception while trying to convert data: " + ve)
+    logging.warning('Exception while trying to convert data: ' + ve)
   except Exception as exc1:
-    print("[ERR] Exception while trying to process file [" + datafile + "]")
-    print(exc1)
+    logging.error('Exception while trying to process file [' + datafile + ']')
+    logging.error(exc1)
     exit(2)
   finally:
     fs.moveArchiveFile(rawfile)
