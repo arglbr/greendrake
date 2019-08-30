@@ -1,0 +1,29 @@
+== VPC
+Address:   10.2.2.0
+Netmask:   255.255.254.0 = 23
+Wildcard:  0.0.1.255
+Network:   10.2.2.0/23
+Broadcast: 10.2.3.255
+HostMin:   10.2.2.1
+HostMax:   10.2.3.254
+Hosts/Net: 510
+
+== Priv subnet 1
+Address:   10.2.2.0
+Netmask:   255.255.255.128 = 25
+Wildcard:  0.0.0.127
+Network:   10.2.2.0/25
+Broadcast: 10.2.2.127
+HostMin:   10.2.2.1
+HostMax:   10.2.2.126
+Hosts/Net: 126
+
+== Priv subnet 2
+Address:   10.2.3.0
+Netmask:   255.255.255.128 = 25
+Wildcard:  0.0.0.127
+Network:   10.2.3.0/25
+Broadcast: 10.2.3.127
+HostMin:   10.2.3.1
+HostMax:   10.2.3.126
+Hosts/Net: 126
