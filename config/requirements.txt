@@ -2,7 +2,7 @@ beautifulsoup4==4.7.1
 lxml==4.3.2
 ofxparse==0.20
 six==1.12.0
-soupsieve==1.8
+soupsieve==2.8.4
 git+git://github.com/jseutter/ofxparse.git
 python-dotenv
 
